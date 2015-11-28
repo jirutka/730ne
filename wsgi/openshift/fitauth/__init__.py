@@ -13,7 +13,7 @@ class FITOAuth2(BaseOAuth2):
     def get_user_details(self, response):
         """Return user details from FIT account"""
         return {'username': response.get('user_id'),
-                'email': response.get('user_email'),
+                'email': response.get('preferredEmail'),
                 'first_name': response.get('firstName'),
                 'last_name': response.get('lastName')}
 
