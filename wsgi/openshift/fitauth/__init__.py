@@ -4,27 +4,28 @@ from social.backends.oauth import BaseOAuth2
 
 class FITOAuth2(BaseOAuth2):
     name = 'fit'
-    AUTHORIZATION_URL = 'https://auth.fit.cvut.cz/oauth/oauth/authorize'
-    ACCESS_TOKEN_URL = 'https://auth.fit.cvut.cz/oauth/oauth/token'
+    AUTHORIZATION_URL = 'https://auth.fit.cvut.cz/oauth/authorize'
+    ACCESS_TOKEN_URL = 'https://auth.fit.cvut.cz/oauth/token'
     ACCESS_TOKEN_METHOD = 'POST'
-    ID_KEY = 'user_id'
+    ID_KEY = 'username'
     EXTRA_DATA = [('roles', 'roles')]
 
     def get_user_details(self, response):
         """Return user details from FIT account"""
-        return {'username': response.get('user_id'),
+        return {'username': response.get('username'),
                 'email': response.get('preferredEmail'),
                 'first_name': response.get('firstName'),
                 'last_name': response.get('lastName')}
 
     def user_data(self, access_token, *args, **kwargs):
         """Loads user data from service"""
-        url = 'https://auth.fit.cvut.cz/oauth/api/v1/tokeninfo'
+        url = 'https://auth.fit.cvut.cz/oauth/userinfo'
         try:
-            data = self.get_json(url, params={'token': access_token})
+            data = self.get_json(
+                url, headers={'Authorization': 'Bearer %s' % access_token})
         except ValueError:
             return None
-        usermap_url = 'https://kosapi.fit.cvut.cz/usermap/v1/people/' + data['user_id']
+        usermap_url = 'https://kosapi.fit.cvut.cz/usermap/v1/people/' + data['username']
         try:
             usermap = self.get_json(
                 usermap_url, headers={'Authorization': 'Bearer %s' % access_token})
